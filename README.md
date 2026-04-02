@@ -66,7 +66,6 @@ The current strategy file uses the following defaults:
 
 ## Repository Structure
 
-```text
 freqtrade-github-repo/
 ├── .gitignore
 ├── README.md
@@ -78,7 +77,7 @@ freqtrade-github-repo/
 ├── backtest-metadata/
 └── strategies/
     └── KrakenScalpHF.py
-Important Folder Note
+## Important Folder Note
 
 Freqtrade uses the strategy file inside:
 
