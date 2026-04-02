@@ -4,11 +4,11 @@
   "initial_state": "running",
   "max_open_trades": 20,
   "stake_currency": "USDT",
-  "stake_amount": 25,
+  "stake_amount": 50000,
   "tradable_balance_ratio": 0.99,
   "fiat_display_currency": "USD",
   "dry_run": true,
-  "dry_run_wallet": 50000,
+  "dry_run_wallet": 500000,
   "db_url": "sqlite:///tradesv3.krakenscalphf_v2.dryrun.sqlite",
   "trading_mode": "spot",
   "margin_mode": "",
@@ -49,11 +49,7 @@
     "ccxt_async_config": {},
     "pair_whitelist": [
       "BTC/USDT",
-      "ETH/USDT",
-      "EURR/USDT",
-      "SOL/USDT",
-      "VIRTUAL/USDT",,
-      "XTZ/USDT"
+      "XRP/USDT",
     ],
     "pair_blacklist": [
       "XMR/USDT"
