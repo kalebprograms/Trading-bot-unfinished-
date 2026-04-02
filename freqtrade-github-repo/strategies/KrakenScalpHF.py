@@ -11,24 +11,24 @@ class KrakenScalpHF(IStrategy):
 
     timeframe = "5m"
     process_only_new_candles = True
-    startup_candle_count = 50
+    startup_candle_count = 200
 
     minimal_roi = {
         "0": 0.015
     }
 
-    stoploss = -0.0012
+    stoploss = -0.012
     trailing_stop = False
 
     use_exit_signal = False
     exit_profit_only = True
-    ignore_roi_if_entry_signal = True
+    ignore_roi_if_entry_signal = False
 
-    buy_rsi = IntParameter(25, 45, default=40, space="buy")
+    buy_rsi = IntParameter(25, 40, default=30, space="buy")
     ema_fast_len = IntParameter(8, 20, default=12, space="buy")
     ema_slow_len = IntParameter(21, 80, default=34, space="buy")
-    vol_mult = DecimalParameter(0.5, 1.5, default=0.6, decimals=2, space="buy")
-    bounce_mult = DecimalParameter(1.000, 1.004, default=1.000, decimals=3, space="buy")
+    vol_mult = DecimalParameter(1.0, 2.0, default=1.20, decimals=2, space="buy")
+    bounce_mult = DecimalParameter(1.001, 1.006, default=1.003, decimals=3, space="buy")
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=int(self.ema_fast_len.value))
@@ -50,20 +50,29 @@ class KrakenScalpHF(IStrategy):
 
         conditions.append(dataframe["volume"] > 0)
 
-        # looser oversold threshold
+        # tighter oversold threshold
         conditions.append(dataframe["rsi"] < int(self.buy_rsi.value))
+
+        # simple trend filter
+        conditions.append(dataframe["close"] > dataframe["ema_200"])
+        conditions.append(dataframe["ema_fast"] > dataframe["ema_slow"])
 
         # buy dips below fast EMA
         conditions.append(dataframe["close"] < dataframe["ema_fast"])
 
-        # allow near lower BB instead of deep below it
+        # healthier pullback zone
         conditions.append(dataframe["close"] < dataframe["bb_mid"])
+        conditions.append(dataframe["close"] > dataframe["bb_lower"])
 
-        # simple bounce confirmation
-        conditions.append(dataframe["close"] >= (dataframe["prev_close"] * float(self.bounce_mult.value)))
+        # stronger bounce confirmation
+        conditions.append(
+            dataframe["close"] >= (dataframe["prev_close"] * float(self.bounce_mult.value))
+        )
 
-        # looser volume filter
-        conditions.append(dataframe["volume"] > (dataframe["vol_mean"] * float(self.vol_mult.value)))
+        # stronger volume confirmation
+        conditions.append(
+            dataframe["volume"] > (dataframe["vol_mean"] * float(self.vol_mult.value))
+        )
 
         dataframe.loc[
             reduce(lambda x, y: x & y, conditions),
